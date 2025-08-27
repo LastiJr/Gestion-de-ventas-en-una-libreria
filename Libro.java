@@ -51,5 +51,8 @@ public class Libro {
     public void setIsbn(String isbn){
         this.isbn = isbn;
     }
+    public String toString() {
+        return "[" + isbn + "] " + titulo + " - " + autor + " ($" + precio + ", stock " + stock + ")";
+    }
     
 }
