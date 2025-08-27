@@ -51,7 +51,7 @@ public class Estante
 
     public void agregarLibro(String titulo, String autor, double precio, int stock, String isbn) 
     {   
-        libros.add(new Libro(isbn, titulo, autor, precio, stock));
+        libros.add(new Libro(titulo, autor, precio, stock, isbn));
     }
     
     // Busquedas
@@ -98,6 +98,7 @@ public class Estante
         return "Estante: " + nombre + " (" + libros.size() + " libros)";
     }
 }
+
 
 
 
