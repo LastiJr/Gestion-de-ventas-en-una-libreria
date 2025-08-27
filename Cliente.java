@@ -13,7 +13,7 @@ public class Cliente {
         this.correo = correo;
     }
 
-        public String getNombre(){
+    public String getNombre(){
         return this.nombre;
     }
     public void setNombre(String nombre){
@@ -34,5 +34,6 @@ public class Cliente {
         this.correo = correo;
     }
 }
+
 
 
