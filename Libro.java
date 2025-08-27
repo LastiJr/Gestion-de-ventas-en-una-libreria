@@ -51,8 +51,20 @@ public class Libro {
     public void setIsbn(String isbn){
         this.isbn = isbn;
     }
-    public String toString() {
-        return "[" + isbn + "] " + titulo + " - " + autor + " ($" + precio + ", stock " + stock + ")";
+
+    public void ajustarStock(int delta)
+    {
+        int nuevo = this.stock + delta;
+        if (nuevo < 0) nuevo = 0;
+        this.stock = nuevo;
     }
+
+    @Override
+    public String toString()
+    {
+        return String.format("[%s] \"%s\" - %s | $%.0f | stock: %d",isbn, titulo, autor, precio, stock);
+    }
+
+    
     
 }
