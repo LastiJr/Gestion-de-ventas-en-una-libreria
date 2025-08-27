@@ -16,5 +16,34 @@ public class Venta {
         this.idVenta = idVenta;
         this.fecha = fecha;
         this.cliente = cliente;
-    } 
+    }
+
+    public String getIdVenta(){ 
+        return this.idVenta; 
+    }
+    public void setIdVenta(String idVenta){ 
+        this.idVenta = idVenta; 
+    }
+
+    public LocalDate getFecha(){ 
+        return this.fecha;
+    }
+    public void setFecha(LocalDate fecha){ 
+        this.fecha = fecha; 
+    }
+
+    public Cliente getCliente(){ 
+        return this.cliente;
+    }
+    public void setCliente(Cliente cliente){ 
+        this.cliente = cliente; 
+    }
+
+    public List<Libro> getItems(){ 
+        return this.items; 
+    }
+    public void setItems(List<Libro> items){ 
+        this.items = items; 
+    }
 }
+
