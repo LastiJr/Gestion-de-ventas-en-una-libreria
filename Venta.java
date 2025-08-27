@@ -45,5 +45,27 @@ public class Venta {
     public void setItems(List<Libro> items){ 
         this.items = items; 
     }
+
+
+    
+    public void agregarItem(Libro libro) {
+        if (libro != null) items.add(libro);
+    }
+    public void agregarItem(String titulo, String autor, double precio, int stock, String isbn) {
+        items.add(new Libro(titulo, autor, precio, stock, isbn));
+    }
+    public double total() {
+        double suma = 0;
+        for (Libro l : items) suma += l.getPrecio();
+        return suma;
+    }
+    public String toString() {
+        return "Venta " + idVenta + " - " + fecha +
+               " - Cliente: " + (cliente != null ? cliente.getNombre() : "N/A") +
+               " - Total: $" + total();
+    }
 }
+    
+}
+
 
