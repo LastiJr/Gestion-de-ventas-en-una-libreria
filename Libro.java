@@ -16,4 +16,40 @@ public class Libro {
         this.stock = stock;
         this.isbn = isbn;
     }
+    
+    public String getTitulo(){
+        return this.titulo;
+    }
+    public void setTitulo(String titulo){
+        this.titulo = titulo;
+    }
+    
+    public String getAutor(){
+        return this.autor;
+    }
+    public void setAutor(String autor){
+        this.autor = autor;
+    }
+    
+    public double getPrecio(){
+        return this.precio;
+    }
+    public void setPrecio(double precio){
+        this.precio = precio;
+    }
+    
+    public int getStock(){
+        return this.stock;
+    }
+    public void setStock(int stock){
+        this.stock = stock;
+    }
+    
+    public String getIsbn(){
+        return this.isbn;
+    }
+    public void setIsbn(String isbn){
+        this.isbn = isbn;
+    }
+    
 }
