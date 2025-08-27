@@ -81,7 +81,7 @@ public class Venta
     
     public void agregarItem(String titulo, String autor, double precio, int stock, String isbn) 
     {
-        items.add(new Libro(isbn, titulo, autor, precio, stock));
+        items.add(new Libro(titulo, autor, precio, stock, isbn));
     }
     
     public double total() 
@@ -100,6 +100,7 @@ public class Venta
                " - Total: $" + total();
     }
 }
+
 
 
 
