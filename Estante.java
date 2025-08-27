@@ -25,5 +25,27 @@ public class Estante {
     public void setLibros(List<Libro> libros){
         this.libros = libros;
     }
+
+
+
+    public void agregarLibro(Libro libro) {
+        if (libro != null) libros.add(libro);
+    }
+    public void agregarLibro(String titulo, String autor, double precio, int stock, String isbn) {
+        libros.add(new Libro(titulo, autor, precio, stock, isbn));
+    }
+    public Libro buscarPorIsbn(String isbn) {
+        if (isbn == null) return null;
+        for (Libro l : libros) {
+            if (isbn.equalsIgnoreCase(l.getIsbn())) return l;
+        }
+        return null;
+    }
+    public int cantidadLibros() { return libros.size(); }
+
+    public String toString() {
+        return "Estante: " + nombre + " (" + libros.size() + " libros)";
+    }
 }
+
 
