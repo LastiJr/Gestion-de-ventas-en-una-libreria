@@ -37,12 +37,12 @@ public class Sistema
     private void seed() 
     {
         Estante novelas = new Estante("Novelas");
-        novelas.agregarLibro("El Quijote", "Cervantes", 12000, 5, "ISBN001");
-        novelas.agregarLibro("1984", "George Orwell", 10000, 3, "ISBN002");
+        novelas.agregarLibro("El Quijote", "Cervantes", 12000, 5, "001");
+        novelas.agregarLibro("1984", "George Orwell", 10000, 3, "002");
 
         Estante tecnologia = new Estante("Tecnología");
-        tecnologia.agregarLibro("Clean Code", "Robert C. Martin", 25000, 4, "ISBN100");
-        tecnologia.agregarLibro("Effective Java", "Joshua Bloch", 27000, 2, "ISBN101");
+        tecnologia.agregarLibro("Clean Code", "Robert C. Martin", 25000, 4, "100");
+        tecnologia.agregarLibro("Effective Java", "Joshua Bloch", 27000, 2, "101");
 
         estantes.add(novelas);
         estantes.add(tecnologia);
@@ -123,18 +123,32 @@ public class Sistema
             if (!"s".equalsIgnoreCase(crear)) return;
             
             est = new Estante(nombre);
-            
             estantes.add(est);
         }
 
         System.out.print("ISBN: ");   String isbn = leerNoVacio(br);
+
+        // 🔒 Bloqueo global por ISBN: si ya existe en cualquier estante, NO se agrega.
+        if (catalogo.containsKey(isbn))
+        {
+            System.out.println("No se agregó: ya existe un libro con ISBN " + isbn + " en el sistema.");
+            return;
+        }
+
         System.out.print("Título: "); String titulo = leerNoVacio(br);
         System.out.print("Autor: ");  String autor = leerNoVacio(br);
         System.out.print("Precio: "); double precio = parseDoubleSafe(br.readLine(), 0);
         System.out.print("Stock: ");  int stock = parseIntSafe(br.readLine(), 0);
 
-        est.agregarLibro(titulo, autor, precio, stock, isbn);
+        // Además, Estante.agregarLibro debería bloquear duplicado local si existiera.
+        boolean agregado = est.agregarLibro(titulo, autor, precio, stock, isbn);
+        if (!agregado)
+        {
+            System.out.println("No se agregó el libro (posible ISBN duplicado en el mismo estante).");
+            return;
+        }
 
+        // Synchronizar catálogo global
         Libro recien = est.buscarPorIsbn(isbn);
         if (recien != null) catalogo.put(isbn, recien);
         System.out.println("Libro agregado al estante \"" + est.getNombre() + "\"");
@@ -291,5 +305,3 @@ public class Sistema
         return "V" + System.currentTimeMillis();
     }
 }
-
-
