@@ -96,11 +96,7 @@ public class Venta
     {
         return "Venta " + idVenta + " - " + fecha +
                " - Cliente: " + (cliente != null ? cliente.getNombre() : "N/A") +
-               " - Ítems: " + items.size() +
+               " - Ítems: " + items.size() + 
                " - Total: $" + total();
     }
 }
-
-
-
-
