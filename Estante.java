@@ -32,29 +32,29 @@ public class Estante
         this.libros = libros;
     }
     
-
-    public void agregarLibro(Libro l)
+    public boolean agregarLibro(Libro l)
     {
-        if (l == null) return;
-     
-        Libro existente = buscarPorIsbn(l.getIsbn()); 
-        if (existente != null) 
+        if (l == null) return false;
+        if (buscarPorIsbn(l.getIsbn()) != null)
         {
-            existente.ajustarStock(l.getStock());
-            if (l.getPrecio() > 0) existente.setPrecio(l.getPrecio());
-            if (l.getTitulo() != null) existente.setTitulo(l.getTitulo());
-            if (l.getAutor() != null) existente.setAutor(l.getAutor());
-        } else{
-            libros.add(l);
+            System.out.println("No se agregó: ya existe un libro con ISBN " + l.getIsbn());
+            return false;
         }
+        libros.add(l);
+        return true;
     }
 
-    public void agregarLibro(String titulo, String autor, double precio, int stock, String isbn) 
+    public boolean agregarLibro(String titulo, String autor, double precio, int stock, String isbn) 
     {   
+        if (buscarPorIsbn(isbn) != null)
+        {
+            System.out.println("No se agregó: ya existe un libro con ISBN " + isbn);
+            return false;
+        }
         libros.add(new Libro(titulo, autor, precio, stock, isbn));
+        return true;
     }
     
-    // Busquedas
     public Libro buscarPorIsbn(String isbn) 
     {
         if (isbn == null) return null;
@@ -63,21 +63,6 @@ public class Estante
             if (isbn.equalsIgnoreCase(l.getIsbn())) return l;
         }
         return null;
-    }
-    
-    public List<Libro> buscarLibrosPorTitulo(String titulo)
-    {
-        List<Libro> res = new ArrayList<>();
-        if (titulo == null) return res;
-        String q = titulo.toLowerCase();
-        for (Libro l : libros)
-            {
-            if (l.getTitulo() != null && l.getTitulo().toLowerCase().contains(q)) 
-            {
-                res.add(l);
-            }
-        }
-        return res;
     }
 
     public void listarLibros() 
@@ -98,7 +83,3 @@ public class Estante
         return "Estante: " + nombre + " (" + libros.size() + " libros)";
     }
 }
-
-
-
-
