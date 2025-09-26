@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="8" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mycompany.gestionlibreria.controlador.ControladorVenta">
+    <padding>
+        <Insets top="10" right="10" bottom="10" left="10"/>
+    </padding>
+
+
+    <HBox spacing="8">
+        <Label text="Menú Ventas" style="-fx-font-size:16px; -fx-font-weight:bold;"/>
+        <Pane HBox.hgrow="ALWAYS"/>
+        <Button fx:id="btnVolver" text="Volver" onAction="#volverAlMenu"/>
+    </HBox>
+
+
+    <TitledPane text="Nueva Venta" expanded="true">
+        <content>
+            <GridPane hgap="8" vgap="8">
+                <Label text="Cliente (RUT):" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <ComboBox fx:id="comboCliente" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                <Label text="Enviar correo:" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                <ToggleButton fx:id="toggleCorreo" text="OFF" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+                <Label text="ISBN:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtIsbn" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                <Label text="Cantidad:" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                <TextField fx:id="txtCantidad" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+                <Button text="Agregar Item" onAction="#agregarItem" GridPane.rowIndex="1" GridPane.columnIndex="4"/>
+                <Button text="Confirmar Venta" onAction="#confirmarVenta" GridPane.rowIndex="1" GridPane.columnIndex="5"/>
+            </GridPane>
+        </content>
+    </TitledPane>
+
+
+    <TitledPane text="Ítems de la venta" expanded="true">
+        <content>
+            <TableView fx:id="tablaItems" prefHeight="180">
+                <columns>
+                    <TableColumn fx:id="cIsbn"   text="ISBN"    prefWidth="140"/>
+                    <TableColumn fx:id="cTitulo" text="Título"  prefWidth="240"/>
+                    <TableColumn fx:id="cCant"   text="Cant."   prefWidth="80"/>
+                    <TableColumn fx:id="cPrecio" text="Precio"  prefWidth="120"/>
+                </columns>
+            </TableView>
+        </content>
+    </TitledPane>
+
+    <TitledPane text="Ventas registradas" expanded="true">
+        <content>
+            <TableView fx:id="tablaVentas" prefHeight="160">
+                <columns>
+                    <TableColumn fx:id="vId"      text="ID"             prefWidth="160"/>
+                    <TableColumn fx:id="vFecha"   text="Fecha"          prefWidth="120"/>
+                    <TableColumn fx:id="vCliente" text="Cliente (RUT)"  prefWidth="220"/>
+                    <TableColumn fx:id="vItems"   text="Total Ítems"    prefWidth="100"/>
+                    <TableColumn fx:id="vIsbns"   text="ISBN(s)"        prefWidth="220"/>
+                    <TableColumn fx:id="vTotal"   text="Total ($)"      prefWidth="120"/>
+                </columns>
+            </TableView>
+        </content>
+    </TitledPane>
+
+</VBox>
