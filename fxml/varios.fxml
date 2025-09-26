@@ -17,9 +17,10 @@
         <Label text="Rango:"/>
         <ComboBox fx:id="comboRango" prefWidth="180"/>
         <Label text="Categoría:"/>
-        <ComboBox fx:id="comboCategoria" prefWidth="200"/>
+        <ComboBox fx:id="comboCategoria" prefWidth="220"/>
         <Pane HBox.hgrow="ALWAYS"/>
-        <Button text="Exportar a Excel" onAction="#exportar"/>
+        <Button fx:id="btnPastel" text="Gráfico Pastel" onAction="#mostrarPastel" visible="false" managed="false"/>
+        <Button text="Exportar a Excel (CSV)" onAction="#exportar"/>
     </HBox>
 
     <BorderPane VBox.vgrow="ALWAYS">
