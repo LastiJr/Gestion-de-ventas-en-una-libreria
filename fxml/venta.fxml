@@ -9,13 +9,11 @@
         <Insets top="10" right="10" bottom="10" left="10"/>
     </padding>
 
-
     <HBox spacing="8">
         <Label text="Menú Ventas" style="-fx-font-size:16px; -fx-font-weight:bold;"/>
         <Pane HBox.hgrow="ALWAYS"/>
         <Button fx:id="btnVolver" text="Volver" onAction="#volverAlMenu"/>
     </HBox>
-
 
     <TitledPane text="Nueva Venta" expanded="true">
         <content>
@@ -35,17 +33,28 @@
         </content>
     </TitledPane>
 
-
     <TitledPane text="Ítems de la venta" expanded="true">
         <content>
-            <TableView fx:id="tablaItems" prefHeight="180">
-                <columns>
-                    <TableColumn fx:id="cIsbn"   text="ISBN"    prefWidth="140"/>
-                    <TableColumn fx:id="cTitulo" text="Título"  prefWidth="240"/>
-                    <TableColumn fx:id="cCant"   text="Cant."   prefWidth="80"/>
-                    <TableColumn fx:id="cPrecio" text="Precio"  prefWidth="120"/>
-                </columns>
-            </TableView>
+
+            <VBox spacing="6">
+                <TableView fx:id="tablaItems" prefHeight="180">
+                    <columns>
+                        <TableColumn fx:id="cIsbn"   text="ISBN"    prefWidth="140"/>
+                        <TableColumn fx:id="cTitulo" text="Título"  prefWidth="240"/>
+                        <TableColumn fx:id="cCant"   text="Cant."   prefWidth="80"/>
+                        <TableColumn fx:id="cPrecio" text="Precio"  prefWidth="120"/>
+                    </columns>
+                </TableView>
+
+
+                <HBox spacing="16" alignment="CENTER_RIGHT">
+                    <Label text="Ítems:"/>
+                    <Label fx:id="lblItemsActual" text="0" style="-fx-font-weight: bold;"/>
+                    <Pane HBox.hgrow="ALWAYS"/>
+                    <Label text="Total actual:"/>
+                    <Label fx:id="lblTotalActual" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                </HBox>
+            </VBox>
         </content>
     </TitledPane>
 
