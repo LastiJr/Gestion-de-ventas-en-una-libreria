@@ -1,4 +1,4 @@
-package libreria;
+package com.mycompany.gestionlibreria;
 
 import java.util.Objects;
 
@@ -75,6 +75,7 @@ public class Cliente
     }
       
 }
+
 
 
 
