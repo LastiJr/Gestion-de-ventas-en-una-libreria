@@ -96,7 +96,6 @@ public class Sistema
         return "V" + System.currentTimeMillis(); 
     }
 
-
     public void confirmarVenta(Venta v, boolean enviarCorreo) 
     {
         if (v == null) 
@@ -144,54 +143,6 @@ public class Sistema
         }
     }
 
-    
-    private void menu() throws IOException 
-    {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        while (true) 
-        {
-            System.out.println("\n=== MENÚ ===");
-            System.out.println("1) Registrar VENTA simple");
-            System.out.println("0) Salir");
-            String op = br.readLine();
-            if ("0".equals(op)) 
-                break;
-            if ("1".equals(op)) 
-            {
-                System.out.print("RUT: "); String r = br.readLine().trim().toLowerCase();
-                Cliente cli = clientesPorRut.get(r);
-                if (cli == null) 
-                { System.out.println("Cliente no existe"); 
-                continue; 
-                }
-                Venta v = new Venta(nextVentaId(), LocalDate.now(), cli);
-                while (true) 
-                {
-                    System.out.print("ISBN (vacío fin): ");
-                    String isbn = br.readLine().trim();
-                    if (isbn.isEmpty()) 
-                        break;
-                    Libro l = catalogo.get(isbn);
-                    if (l==null)
-                    { 
-                        System.out.println("No existe"); 
-                        continue; 
-                    }
-                    System.out.print("Cant: ");
-                    int cant = Integer.parseInt(br.readLine().trim());
-                    if (l.getStock() < cant)
-                    { 
-                        System.out.println("Stock agotado"); 
-                        continue; 
-                    }
-                    v.getItems().add(new Libro(l.getTitulo(), l.getAutor(), l.getPrecio(), cant, l.getIsbn(), l.getEditorial()));
-                }
-                confirmarVenta(v, true);
-                System.out.println("Venta confirmada.");
-            }
-        }
-    }
-
     public void cargarDatosDesdeCSV() 
     {
         try 
@@ -214,6 +165,62 @@ public class Sistema
         } catch (Exception e) 
         {
             System.err.println("[CSV] Error al guardar: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public synchronized void agregarLibroNuevo(String titulo, String autor, double precio, int stock, String isbn, String editorial, String nombreEstante) 
+    {
+        if (isbn == null || isbn.trim().isEmpty()) 
+        {
+            throw new IllegalArgumentException("ISBN vacío");
+        }
+        if (nombreEstante == null || nombreEstante.trim().isEmpty()) 
+        {
+            throw new IllegalArgumentException("Debes seleccionar un estante.");
+        }
+
+        Estante est = buscarEstantePorNombre(nombreEstante.trim());
+        if (est == null) 
+        {
+            throw new IllegalArgumentException("El estante \"" + nombreEstante + "\" no existe.");
+        }
+        
+        String key = isbn.trim();
+        Libro enCatalogo = catalogo.get(key);
+        if (enCatalogo == null) 
+        {
+            enCatalogo = new Libro(titulo, autor, precio, Math.max(0, stock), key, editorial);
+            catalogo.put(key, enCatalogo);
+        } else 
+        {
+            enCatalogo.setTitulo(titulo);
+            enCatalogo.setAutor(autor);
+            enCatalogo.setPrecio(precio);
+            enCatalogo.setStock(Math.max(0, stock));
+            enCatalogo.setEditorial(editorial);
+        }
+
+        boolean yaEstaEnEstante = false;
+        for (Libro l : est.getLibros()) 
+        {
+            if (key.equals(l.getIsbn())) 
+            { 
+                yaEstaEnEstante = true; 
+                break; 
+            }
+        }
+        if (!yaEstaEnEstante) 
+        {
+            est.getLibros().add(enCatalogo);
+        }
+
+        try 
+        {
+            guardarDatosEnCSV();
+        } catch (Exception e) 
+        {
+            System.err.println("[CSV] Error guardando tras agregar libro: " + e.getMessage());
             e.printStackTrace();
         }
     }
