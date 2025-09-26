@@ -260,9 +260,6 @@
   -fx-background-color: transparent;
   -fx-text-fill: #e6e6e6;
 }
-.chart-legend-item-symbol {
-  -fx-background-color: #f5a623;          
-}
 
 .bar-chart .chart-bar {
   -fx-border-color: #2f3238;
@@ -280,4 +277,46 @@
 
 .chart .scroll-pane, .chart .viewport {
   -fx-background-color: #15161a;
+}
+
+.chart { -fx-background-color: #15161a; }
+.chart-content { -fx-background-color: #15161a; }
+.chart-plot-background { -fx-background-color: #1a1b1f; }
+
+.chart-title { -fx-text-fill: #e6e6e6; }
+
+.chart-pie-label { -fx-fill: #e6e6e6; }
+.chart-pie { -fx-border-color: #2f3238; -fx-border-width: 1; }
+
+.chart-legend { -fx-background-color: transparent; }
+.chart-legend .label { -fx-text-fill: #e6e6e6; }
+
+.pie-chart .chart-legend-item-symbol.default-color0 { -fx-background-color: #f3622d; } 
+.pie-chart .chart-legend-item-symbol.default-color1 { -fx-background-color: #fba71b; } 
+.pie-chart .chart-legend-item-symbol.default-color2 { -fx-background-color: #57b757; } 
+.pie-chart .chart-legend-item-symbol.default-color3 { -fx-background-color: #41a9c9; } 
+.pie-chart .chart-legend-item-symbol.default-color4 { -fx-background-color: #4258c9; }
+.pie-chart .chart-legend-item-symbol.default-color5 { -fx-background-color: #9a42c8; }
+.pie-chart .chart-legend-item-symbol.default-color6 { -fx-background-color: #c84164; }
+.pie-chart .chart-legend-item-symbol.default-color7 { -fx-background-color: #888888; }
+
+.pie-chart .chart-legend-item-symbol {
+  -fx-background-insets: 0;
+  -fx-background-radius: 50%;
+  -fx-padding: 6;
+}
+
+.bar-chart.chart-estanterias .default-color0.chart-bar { -fx-bar-fill: #f3622d; }
+.bar-chart.chart-estanterias .default-color1.chart-bar { -fx-bar-fill: #fba71b; }
+.bar-chart.chart-estanterias .default-color2.chart-bar { -fx-bar-fill: #57b757; } 
+.bar-chart.chart-estanterias .default-color3.chart-bar { -fx-bar-fill: #41a9c9; } 
+.bar-chart.chart-estanterias .default-color4.chart-bar { -fx-bar-fill: #4258c9; }
+.bar-chart.chart-estanterias .default-color5.chart-bar { -fx-bar-fill: #9a42c8; }
+.bar-chart.chart-estanterias .default-color6.chart-bar { -fx-bar-fill: #c84164; }
+.bar-chart.chart-estanterias .default-color7.chart-bar { -fx-bar-fill: #888888; }
+
+.bar-chart.chart-estanterias .chart-bar {
+  -fx-border-color: #2f3238;
+  -fx-border-width: 0;
+  -fx-background-insets: 0;
 }
