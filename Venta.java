@@ -1,102 +1,103 @@
-package libreria;
+package com.mycompany.gestionlibreria;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class Venta 
 {
-
     private String idVenta;
     private LocalDate fecha;
     private Cliente cliente;
-    private List<Libro> items = new ArrayList<>();
+    private final List<Libro> items = new ArrayList<>();
 
-    public Venta(String idVenta, LocalDate fecha, Cliente cliente) 
-    {
+    
+    private boolean correoEnviado = false;
+
+    public Venta(String idVenta, LocalDate fecha, Cliente cliente) {
         this.idVenta = idVenta;
         this.fecha = fecha;
         this.cliente = cliente;
     }
 
+    
     public String getIdVenta() 
     { 
-        return this.idVenta; 
+        return idVenta; 
     }
-    public void setIdVenta(String idVenta)
+    public void setIdVenta(String idVenta) 
     { 
         this.idVenta = idVenta; 
     }
 
-    public LocalDate getFecha()
+    public LocalDate getFecha() 
     { 
-        return this.fecha;
+        return fecha; 
     }
-    public void setFecha(LocalDate fecha)
+    public void setFecha(LocalDate fecha) 
     { 
         this.fecha = fecha; 
     }
 
-    public Cliente getCliente()
+    public Cliente getCliente() 
     { 
-        return this.cliente;
+        return cliente; 
     }
-    public void setCliente(Cliente cliente)
+    public void setCliente(Cliente cliente) 
     { 
         this.cliente = cliente; 
     }
 
-    public List<Libro> getItems()
+    public List<Libro> getItems() 
     { 
-        return this.items; 
+        return items; 
     }
-    public void setItems(List<Libro> items)
+
+    public boolean isCorreoEnviado() 
     { 
-        this.items = (items == null) ? new ArrayList<>() : items; 
+        return correoEnviado; 
+    }
+    public void setCorreoEnviado(boolean correoEnviado) 
+    { 
+        this.correoEnviado = correoEnviado; 
     }
 
-    //SOBRECARGA 
+    public void agregarItem(String titulo, String autor, double precio, int cantidad, String isbn, String editorial) 
+    {
+        items.add(new Libro(titulo, autor, precio, Math.max(0, cantidad), isbn, editorial));
+    }
+
     
-    public void agregarItem(Libro libro) 
+    public int getCantidadTotalItems() 
     {
-        agregarItem(libro, 1);
+        int total = 0;
+        for (Libro it : items) total += Math.max(0, it.getStock());
+        return total;
     }
-    public void agregarItem(Libro libro, int cantidad) 
-    {
-        if (libro == null || cantidad <= 0) return;
 
-        if (libro.getStock() < cantidad) 
-        {
-            System.out.println("Stock insuficiente para \"" + libro.getTitulo() + "\". Disponible: " + libro.getStock());
-            return;
-        }
-        
-        libro.ajustarStock(-cantidad);
-
-        for (int i = 0; i < cantidad; i++)
-        {
-            items.add(libro);
-        }
-    }
-    
-    public void agregarItem(String titulo, String autor, double precio, int stock, String isbn) 
-    {
-        items.add(new Libro(titulo, autor, precio, stock, isbn));
-    }
     
     public double total() 
     {
-        double suma = 0;
-        for (Libro l : items) suma += l.getPrecio();
+        double suma = 0.0;
+        for (Libro it : items) 
+        {
+            int cant = Math.max(0, it.getStock());
+            suma += it.getPrecio() * cant;
+        }
         return suma;
     }
 
     @Override
     public String toString() 
     {
-        return "Venta " + idVenta + " - " + fecha +
-               " - Cliente: " + (cliente != null ? cliente.getNombre() : "N/A") +
-               " - Ítems: " + items.size() + 
-               " - Total: $" + total();
+        return "Venta{" +
+                "idVenta='" + idVenta + '\'' +
+                ", fecha=" + fecha +
+                ", cliente=" + (cliente!=null?cliente.getRut():"") +
+                ", items=" + items.size() +
+                ", total=" + total() +
+                ", correoEnviado=" + correoEnviado +
+                '}';
     }
 }
