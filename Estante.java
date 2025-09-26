@@ -1,10 +1,9 @@
-package libreria;
+package com.mycompany.gestionlibreria;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Estante 
-{
+public class Estante {
 
     private String nombre;
     private List<Libro> libros = new ArrayList<>();
@@ -14,28 +13,28 @@ public class Estante
         this.nombre = nombre;
     }
 
-    public String getNombre()
-    {
-        return this.nombre;
+    public String getNombre() 
+    { 
+        return this.nombre; 
     }
-    public void setNombre(String nombre)
-    {
-        this.nombre = nombre;
-    }
-    
-    public List<Libro> getLibros()
-    {
-        return this.libros;
-    }
-    public void setLibros(List<Libro> libros)
-    {
-        this.libros = libros;
+    public void setNombre(String nombre) 
+    { 
+        this.nombre = nombre; 
     }
     
-    public boolean agregarLibro(Libro l)
+    public List<Libro> getLibros() 
+    { 
+        return this.libros; 
+    }
+    public void setLibros(List<Libro> libros) 
+    { 
+        this.libros = libros; 
+    }
+    
+    public boolean agregarLibro(Libro l) 
     {
         if (l == null) return false;
-        if (buscarPorIsbn(l.getIsbn()) != null)
+        if (buscarPorIsbn(l.getIsbn()) != null) 
         {
             System.out.println("No se agregó: ya existe un libro con ISBN " + l.getIsbn());
             return false;
@@ -44,14 +43,15 @@ public class Estante
         return true;
     }
 
-    public boolean agregarLibro(String titulo, String autor, double precio, int stock, String isbn) 
+ 
+    public boolean agregarLibro(String titulo, String autor, double precio, int stock, String isbn, String editorial) 
     {   
-        if (buscarPorIsbn(isbn) != null)
+        if (buscarPorIsbn(isbn) != null) 
         {
             System.out.println("No se agregó: ya existe un libro con ISBN " + isbn);
             return false;
         }
-        libros.add(new Libro(titulo, autor, precio, stock, isbn));
+        libros.add(new Libro(titulo, autor, precio, stock, isbn, editorial));
         return true;
     }
     
@@ -72,7 +72,8 @@ public class Estante
             System.out.println("  (sin libros)");
             return;
         }
-        for (Libro l : libros) {
+        for (Libro l : libros) 
+        {
             System.out.println("  • " + l);
         }
     }
