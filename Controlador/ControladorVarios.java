@@ -1,14 +1,19 @@
 package com.mycompany.gestionlibreria.controlador;
 
 import com.mycompany.gestionlibreria.*;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox; 
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -18,15 +23,15 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ControladorVarios 
+public class ControladorVarios
 {
-
     @FXML private ComboBox<String> comboRango;
     @FXML private ComboBox<String> comboCategoria;
     @FXML private BarChart<String, Number> barChart;
     @FXML private CategoryAxis xAxis;
     @FXML private NumberAxis yAxis;
     @FXML private Label lblResumen;
+    @FXML private Button btnPastel;
 
     private final Sistema sis = Sistema.getInstance();
     private final NumberFormat nfCL = NumberFormat.getInstance(new java.util.Locale("es","CL"));
@@ -38,10 +43,10 @@ public class ControladorVarios
     private static final String RALL = "Desde el inicio";
 
     private static final String CAT_CLIENTES = "Clientes (total de compras)";
-    private static final String CAT_ESTANTES = "Estanterias (total de ventas)";
+    private static final String CAT_ESTANTES = "Estanterias (total de libros vendidos)";
 
     @FXML
-    private void initialize() 
+    private void initialize()
     {
         nfCL.setMaximumFractionDigits(0);
 
@@ -66,7 +71,7 @@ public class ControladorVarios
     }
 
     @FXML
-    private void exportar() 
+    private void exportar()
     {
         LocalDate desde = resolverFechaInicio(comboRango.getValue());
         java.util.List<Venta> ventas = filtrarVentasPorFecha(desde);
@@ -74,7 +79,8 @@ public class ControladorVarios
         Path exportDir = Paths.get("data", "export");
         try 
         { 
-            if (!Files.exists(exportDir)) Files.createDirectories(exportDir); 
+            if (!Files.exists(exportDir)) 
+                Files.createDirectories(exportDir); 
         } catch (IOException ignored) {}
 
         String sufijo = sufijoArchivo(comboRango.getValue(), desde);
@@ -108,15 +114,14 @@ public class ControladorVarios
                 }
             }
             info("Exportado en data/export/");
-        } catch (Exception ex) 
-        {
+        } catch (Exception ex) {
             ex.printStackTrace();
             alerta("No se pudo exportar.");
         }
     }
 
     @FXML
-    private void volverAlMenu(javafx.event.ActionEvent evt) 
+    private void volverAlMenu(javafx.event.ActionEvent evt)
     {
         try 
         {
@@ -132,17 +137,12 @@ public class ControladorVarios
             st.setTitle("Menú");
             st.setMaximized(false);
             st.setResizable(false);
-            st.sizeToScene();  
+            st.sizeToScene();
             st.centerOnScreen();
-        } catch (Exception ex) 
-        { 
-            ex.printStackTrace(); 
-        }
+        } catch (Exception ex) { ex.printStackTrace(); }
     }
 
-
-
-    private void refrescarGrafico() 
+    private void refrescarGrafico()
     {
         LocalDate desde = resolverFechaInicio(comboRango.getValue());
         java.util.List<Venta> ventas = filtrarVentasPorFecha(desde);
@@ -150,10 +150,19 @@ public class ControladorVarios
         String cat = comboCategoria.getValue();
         barChart.getData().clear();
 
+        boolean esEstantes = CAT_ESTANTES.equals(cat);
+        if (btnPastel != null) 
+        {
+            btnPastel.setVisible(esEstantes);
+            btnPastel.setManaged(esEstantes);
+        }
+
         XYChart.Series<String, Number> serie = new XYChart.Series<>();
 
-        if (CAT_CLIENTES.equals(cat)) 
+        if (CAT_CLIENTES.equals(cat))
         {
+            barChart.getStyleClass().remove("chart-estanterias");
+
             LinkedHashMap<String, Long> comprasPorCliente = ventas.stream()
                     .collect(Collectors.groupingBy(
                             v -> v.getCliente()!=null ? v.getCliente().getRut() : "(sin rut)",
@@ -166,16 +175,27 @@ public class ControladorVarios
             xAxis.setLabel("Cliente (RUT)");
             yAxis.setLabel("Compras");
             lblResumen.setText("Clientes: " + comprasPorCliente.size() + "  |  Ventas en rango: " + ventas.size());
-        } else 
+
+            barChart.getData().add(serie);
+        }
+        else
         {
+            if (!barChart.getStyleClass().contains("chart-estanterias"))
+                barChart.getStyleClass().add("chart-estanterias");
+
             LinkedHashMap<String, Long> totalPorEstante = new LinkedHashMap<>();
-            for (Venta v : ventas) 
+            LinkedHashMap<String, Integer> unidadesPorEstante = new LinkedHashMap<>();
+
+            for (Venta v : ventas)
             {
-                Map<String, AgrupItem> map = agruparItems(v);
+                Map<String, AgrupItem> map = agruparItems(v); 
+
+
                 for (AgrupItem ai : map.values()) 
                 {
                     long linea = Math.round(ai.precioUnit) * ai.cant;
                     totalPorEstante.merge(ai.estante, linea, Long::sum);
+                    unidadesPorEstante.merge(ai.estante, ai.cant, Integer::sum); 
                 }
             }
 
@@ -187,28 +207,90 @@ public class ControladorVarios
             yAxis.setLabel("Total ventas ($)");
             long suma = totalPorEstante.values().stream().mapToLong(Long::longValue).sum();
             lblResumen.setText("Estanterías: " + totalPorEstante.size() + "  |  Total en rango: $" + nfCL.format(suma));
-        }
 
-        barChart.getData().add(serie);
+            barChart.getData().add(serie);
+
+            colorizarBarrasEstanterias(serie);
+            Platform.runLater(() -> etiquetarBarrasDual(serie, unidadesPorEstante, totalPorEstante));
+        }
+    }
+
+    private void colorizarBarrasEstanterias(XYChart.Series<String, Number> serie) {
+        Platform.runLater(() -> 
+        {
+            int i = 0;
+            for (XYChart.Data<String, Number> d : serie.getData()) {
+                Node n = d.getNode();
+                if (n != null) 
+                {
+                    n.getStyleClass().removeIf(s -> s.startsWith("default-color"));
+                    n.getStyleClass().add("default-color" + (i % 8));
+                }
+                i++;
+            }
+        });
     }
 
 
+    @FXML
+    private void mostrarPastel() 
+    {
+        if (!CAT_ESTANTES.equals(comboCategoria.getValue())) 
+            return;
 
-    private LocalDate resolverFechaInicio(String opcion) 
+        LocalDate desde = resolverFechaInicio(comboRango.getValue());
+        java.util.List<Venta> ventas = filtrarVentasPorFecha(desde);
+
+        Map<String, Long> totalPorEstante = new LinkedHashMap<>();
+        for (Venta v : ventas) 
+        {
+            Map<String, AgrupItem> map = agruparItems(v); 
+            for (AgrupItem ai : map.values()) {
+                long linea = Math.round(ai.precioUnit) * ai.cant;
+                totalPorEstante.merge(ai.estante, linea, Long::sum);
+            }
+        }
+
+        double sum = totalPorEstante.values().stream().mapToDouble(Long::doubleValue).sum();
+        PieChart pie = new PieChart();
+        pie.setLegendVisible(true);
+        pie.setLabelsVisible(true);
+        pie.setTitle("Participación por Estantería (por ventas $)");
+
+        totalPorEstante.forEach((est, tot) -> {
+            double pct = (sum > 0) ? (tot * 100.0 / sum) : 0.0;
+            String name = String.format("%s (%.1f%%)", est, pct);
+            pie.getData().add(new PieChart.Data(name, tot));
+        });
+
+        Stage dlg = new Stage();
+        dlg.initOwner(barChart.getScene().getWindow());
+        dlg.initModality(Modality.NONE);
+        dlg.setTitle("Participación por Estantería (%)");
+
+        BorderPane root = new BorderPane(pie);
+        Scene sc = new Scene(root, 720, 520);
+
+        String css = sis.getCurrentStylesheet();
+        if (css != null) 
+            sc.getStylesheets().add(css);
+
+        dlg.setScene(sc);
+        dlg.setResizable(true);
+        dlg.show();
+    }
+
+    private LocalDate resolverFechaInicio(String opcion)
     {
         LocalDate hoy = LocalDate.now();
-        if (R1D.equals(opcion)) 
-            return hoy.minusDays(1);
-        if (R7D.equals(opcion)) 
-            return hoy.minusDays(7);
-        if (R1M.equals(opcion)) 
-            return hoy.minusMonths(1);
-        if (R1Y.equals(opcion)) 
-            return hoy.minusYears(1);
+        if (R1D.equals(opcion))  return hoy.minusDays(1);
+        if (R7D.equals(opcion))  return hoy.minusDays(7);
+        if (R1M.equals(opcion))  return hoy.minusMonths(1);
+        if (R1Y.equals(opcion))  return hoy.minusYears(1);
         return LocalDate.MIN;
     }
 
-    private java.util.List<Venta> filtrarVentasPorFecha(LocalDate desde) 
+    private java.util.List<Venta> filtrarVentasPorFecha(LocalDate desde)
     {
         return sis.getVentas().stream()
                 .filter(v -> v.getFecha()!=null && !v.getFecha().isBefore(desde))
@@ -228,24 +310,26 @@ public class ControladorVarios
         return total;
     }
 
-    private Map<String, AgrupItem> agruparItems(Venta v) 
+    private Map<String, AgrupItem> agruparItems(Venta v)
     {
         Map<String, AgrupItem> map = new LinkedHashMap<>();
-        for (Libro it : v.getItems()) 
-        {
+        for (Libro it : v.getItems()) {
             String isbn = it.getIsbn();
             if (isbn == null) 
                 continue;
+
+            Estante est = buscarEstantePorIsbn(isbn);
+            if (est == null) 
+                continue;
+
             AgrupItem ai = map.get(isbn);
-            if (ai == null) 
-            {
+            if (ai == null) {
                 ai = new AgrupItem();
                 ai.isbn = isbn;
                 ai.titulo = it.getTitulo();
                 ai.precioUnit = it.getPrecio();
                 ai.cant = 0;
-                Estante est = buscarEstantePorIsbn(isbn);
-                ai.estante = est != null ? est.getNombre() : "(sin estante)";
+                ai.estante = est.getNombre(); 
                 map.put(isbn, ai);
             }
             ai.cant += Math.max(0, it.getStock());
@@ -253,49 +337,73 @@ public class ControladorVarios
         return map;
     }
 
-    private Estante buscarEstantePorIsbn(String isbn) 
+    private Estante buscarEstantePorIsbn(String isbn)
     {
-        for (Estante e : sis.getEstantes()) 
-        {
-            for (Libro l : e.getLibros()) 
-            {
+        for (Estante e : sis.getEstantes())
+            for (Libro l : e.getLibros())
                 if (isbn.equals(l.getIsbn())) 
                     return e;
-            }
-        }
         return null;
     }
 
-    private static class AgrupItem 
+    private static class AgrupItem
     {
         String isbn; String titulo; double precioUnit; int cant; String estante;
     }
 
-    private static BufferedWriter newWriterCSV(Path path) throws IOException 
+    private void etiquetarBarrasDual(XYChart.Series<String, Number> serie,
+                                     Map<String, Integer> unidadesPorEstante,
+                                     Map<String, Long> totalPorEstante) {
+        for (XYChart.Data<String, Number> d : serie.getData()) {
+            String est = d.getXValue();
+            int unidades = unidadesPorEstante.getOrDefault(est, 0);
+            long total = totalPorEstante.getOrDefault(est, 0L);
+
+            Node n = d.getNode();
+            if (n instanceof StackPane) {
+                StackPane bar = (StackPane) n;
+                bar.getChildren().removeIf(child -> "bar-dual-label".equals(child.getUserData()));
+
+                Label l1 = new Label(String.valueOf(unidades));               
+                Label l2 = new Label("$" + nfCL.format(total));               
+                l1.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
+                l2.setStyle("-fx-text-fill: white; -fx-font-size: 11px;");
+
+                VBox box = new VBox(2, l1, l2);
+                box.setAlignment(Pos.CENTER);
+                box.setUserData("bar-dual-label");
+
+                StackPane.setAlignment(box, Pos.CENTER);
+                bar.getChildren().add(box);
+            }
+        }
+    }
+
+    private static BufferedWriter newWriterCSV(Path path) throws IOException
     {
-        if (!Files.exists(path.getParent())) Files.createDirectories(path.getParent());
-        
+        if (!Files.exists(path.getParent())) 
+            Files.createDirectories(path.getParent());
         OutputStream os = Files.newOutputStream(path, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
         os.write(0xEF); os.write(0xBB); os.write(0xBF);
         return new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8));
     }
-    private static void writeRow(Writer w, String... cols) throws IOException 
+    private static void writeRow(Writer w, String... cols) throws IOException
     {
-        for (int i=0;i<cols.length;i++)
-        { 
-            if (i>0) 
-                w.write(';'); w.write(esc(cols[i])); }
+        for (int i=0;i<cols.length;i++) 
+        {
+            if (i>0) w.write(';');
+            w.write(esc(cols[i]));
+        }
         w.write("\r\n");
     }
     private static String esc(String s)
     {
-        if (s == null) 
-            return "";
+        if (s == null) return "";
         boolean needs = s.indexOf(';') >= 0 || s.contains("\"") || s.contains("\n") || s.contains("\r");
         String v = s.replace("\"","\"\"");
         return needs ? ("\"" + v + "\"") : v;
     }
-    
+
     private String sufijoArchivo(String opcion, LocalDate desde)
     {
         if (RALL.equals(opcion)) 
@@ -314,22 +422,25 @@ public class ControladorVarios
         new Alert(Alert.AlertType.INFORMATION, m).showAndWait(); 
     }
 
-    private static class StringConverterNumber extends javafx.util.StringConverter<Number> 
+    private static class StringConverterNumber extends javafx.util.StringConverter<Number>
     {
         private final NumberFormat nf;
-        StringConverterNumber(NumberFormat nf){ this.nf = nf; }
+        StringConverterNumber(NumberFormat nf)
+        { 
+            this.nf = nf; 
+        }
         @Override public String toString(Number object)
         { 
             return object==null? "" : nf.format(object.longValue()); 
         }
-        @Override public Number fromString(String string)
-        { 
+        @Override public Number fromString(String string){
             try 
-        { 
-            return nf.parse(string).longValue(); 
-        } catch(Exception e)
-        { return 0; 
-        } 
+            { 
+                return nf.parse(string).longValue(); 
+            } catch(Exception e)
+            { 
+                return 0; 
+            }
         }
     }
 }
