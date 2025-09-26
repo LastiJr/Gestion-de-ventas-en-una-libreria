@@ -1,4 +1,4 @@
-package libreria;
+package com.mycompany.gestionlibreria;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,302 +6,215 @@ import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.util.*;
 
-
 public class Sistema 
 {
+    private static Sistema instance;
+    public static synchronized Sistema getInstance() 
+    {
+        if (instance == null) 
+            instance = new Sistema();
+        return instance;
+    }
 
-    // Colecciones principales
-    private final List<Estante> estantes = new ArrayList<>();     
-    private final Map<String, Libro> catalogo = new HashMap<>();  
+    private String currentStylesheet;
+    public String getCurrentStylesheet() 
+    { 
+        return currentStylesheet; 
+    }
+    public void setCurrentStylesheet(String css) 
+    { 
+        this.currentStylesheet = css; 
+    }
+
+    private ServicioCorreo correoService;
+    public ServicioCorreo getCorreoService() 
+    { 
+        return correoService; 
+    }
+    public void setCorreoService(ServicioCorreo sc) 
+    { 
+        this.correoService = sc; 
+    }
+
+    private final List<Estante> estantes = new ArrayList<>();
+    private final Map<String, Libro> catalogo = new HashMap<>();
     private final List<Cliente> clientes = new ArrayList<>();
     private final Map<String, Cliente> clientesPorRut = new HashMap<>();
     private final List<Venta> ventas = new ArrayList<>();
 
-    public static void main(String[] args) 
-    {
-        Sistema app = new Sistema();
-        System.out.println("Sistema de Gestión de Ventas de Librería");
-        app.seed();
-        
-        try 
-        {
-            app.menu();
-        } catch (IOException e) 
-        {
-            System.out.println("Error de entrada/salida: " + e.getMessage());
-        }
-        
-        System.out.println("Hasta luego.");
+    public List<Estante> getEstantes() 
+    { 
+        return estantes; 
+    }
+    public Map<String, Libro> getCatalogo() 
+    { 
+        return catalogo; 
+    }
+    public List<Cliente> getClientes() 
+    { 
+        return clientes; 
+    }
+    public Map<String, Cliente> getClientesPorRut() 
+    { 
+        return clientesPorRut; 
+    }
+    public List<Venta> getVentas() 
+    { 
+        return ventas; 
     }
 
-    private void seed() 
+    private Sistema() 
     {
-        Estante novelas = new Estante("Novelas");
-        novelas.agregarLibro("El Quijote", "Cervantes", 12000, 5, "001");
-        novelas.agregarLibro("1984", "George Orwell", 10000, 3, "002");
-
-        Estante tecnologia = new Estante("Tecnología");
-        tecnologia.agregarLibro("Clean Code", "Robert C. Martin", 25000, 4, "100");
-        tecnologia.agregarLibro("Effective Java", "Joshua Bloch", 27000, 2, "101");
-
-        estantes.add(novelas);
-        estantes.add(tecnologia);
-
-        refrescarCatalogo();
-
-        agregarClienteAlSistema(new Cliente("Ana Gómez", "11.111.111-1", "ana@example.com"));
-        agregarClienteAlSistema(new Cliente("Luis Pérez", "22.222.222-2", "luis@example.com"));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> 
+        {
+            try { guardarDatosEnCSV(); } catch (Exception ignored) {}
+        }));
+        cargarDatosDesdeCSV();
     }
 
-    private void refrescarCatalogo() 
+    public Estante buscarEstantePorNombre(String nombre) 
     {
-        catalogo.clear();
         for (Estante e : estantes) 
+            if (e.getNombre().equalsIgnoreCase(nombre)) 
+                return e;
+        return null;
+    }
+    public Libro buscarLibroPorIsbn(String isbn) 
+    { 
+        return catalogo.get(isbn); 
+    }
+
+    public void agregarClienteAlSistema(Cliente c)
+    {
+        clientes.add(c);
+        if (c.getRut()!=null) 
+            clientesPorRut.put(c.getRut().toLowerCase(), c);
+    }
+
+    public String nextVentaId() 
+    { 
+        return "V" + System.currentTimeMillis(); 
+    }
+
+
+    public void confirmarVenta(Venta v, boolean enviarCorreo) 
+    {
+        if (v == null) 
+            return;
+
+        for (Libro item : v.getItems()) 
         {
-            for (Libro l : e.getLibros()) 
+            Libro real = catalogo.get(item.getIsbn());
+            int cant = Math.max(0, item.getStock());
+            if (real == null || real.getStock() < cant) 
             {
-                catalogo.put(l.getIsbn(), l);
+                throw new IllegalStateException("Stock agotado para ISBN: "+ (real != null ? real.getIsbn() : item.getIsbn()));
             }
         }
-    }
 
-    private void agregarClienteAlSistema(Cliente c) 
-    {
-        if (c == null) return;
-        clientes.add(c);
-        
-        if (c.getRut() != null) 
+        for (Libro item : v.getItems()) 
         {
-            clientesPorRut.put(c.getRut().toLowerCase(), c);
+            Libro real = catalogo.get(item.getIsbn());
+            int cant = Math.max(0, item.getStock());
+            real.setStock(real.getStock() - cant);
+        }
+
+        boolean enviado = false;
+        if (enviarCorreo && correoService != null) 
+        {
+            try 
+            {
+                correoService.enviarVenta(v);
+                enviado = true;
+            } catch (Exception e) 
+            {
+                System.err.println("[Correo] Error enviando comprobante: " + e.getMessage());
+            }
+        }
+        v.setCorreoEnviado(enviado);
+
+        ventas.add(v);
+        try 
+        {
+            guardarDatosEnCSV();
+        } catch (Exception e) 
+        {
+            System.err.println("[CSV] Error al guardar post-confirmación: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    //MENUUUUUU
     
-    private void menu() throws IOException
+    private void menu() throws IOException 
     {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         while (true) 
         {
             System.out.println("\n=== MENÚ ===");
-            System.out.println("1) Agregar LIBRO a un ESTANTE (inserción manual)");
-            System.out.println("2) Listar LIBROS por ESTANTE");
-            System.out.println("3) Buscar LIBRO por ISBN");
-            System.out.println("4) Registrar VENTA simple");
-            System.out.println("5) Listar VENTAS");
-            System.out.println("6) Listar CLIENTES");
-            System.out.println("7) Agregar CLIENTE");
+            System.out.println("1) Registrar VENTA simple");
             System.out.println("0) Salir");
-            System.out.print("Opción: ");
             String op = br.readLine();
-            if ("0".equals(op)) break;
-
-            switch(op) 
+            if ("0".equals(op)) 
+                break;
+            if ("1".equals(op)) 
             {
-                case "1": opcionAgregarLibro(br); break; 
-                case "2": opcionListarPorEstante(); break;    
-                case "3": opcionBuscarPorIsbn(br); break;
-                case "4": opcionRegistrarVenta(br); break;
-                case "5": opcionListarVentas(); break;
-                case "6": opcionListarClientes(); break;
-                case "7": opcionAgregarCliente(br); break;
-                default: System.out.println("Opción inválida");
+                System.out.print("RUT: "); String r = br.readLine().trim().toLowerCase();
+                Cliente cli = clientesPorRut.get(r);
+                if (cli == null) 
+                { System.out.println("Cliente no existe"); 
+                continue; 
+                }
+                Venta v = new Venta(nextVentaId(), LocalDate.now(), cli);
+                while (true) 
+                {
+                    System.out.print("ISBN (vacío fin): ");
+                    String isbn = br.readLine().trim();
+                    if (isbn.isEmpty()) 
+                        break;
+                    Libro l = catalogo.get(isbn);
+                    if (l==null)
+                    { 
+                        System.out.println("No existe"); 
+                        continue; 
+                    }
+                    System.out.print("Cant: ");
+                    int cant = Integer.parseInt(br.readLine().trim());
+                    if (l.getStock() < cant)
+                    { 
+                        System.out.println("Stock agotado"); 
+                        continue; 
+                    }
+                    v.getItems().add(new Libro(l.getTitulo(), l.getAutor(), l.getPrecio(), cant, l.getIsbn(), l.getEditorial()));
+                }
+                confirmarVenta(v, true);
+                System.out.println("Venta confirmada.");
             }
         }
     }
 
-    private void opcionAgregarLibro(BufferedReader br) throws IOException 
+    public void cargarDatosDesdeCSV() 
     {
-        System.out.print("Nombre del estante: ");
-        String nombre = leerNoVacio(br);
-        Estante est = buscarEstantePorNombre(nombre);
-        if (est == null) 
+        try 
         {
-            System.out.print("No existe ese estante. ¿Crearlo? (s/n): ");
-            String crear = br.readLine().trim();
-            
-            if (!"s".equalsIgnoreCase(crear)) return;
-            
-            est = new Estante(nombre);
-            estantes.add(est);
-        }
-
-        System.out.print("ISBN: ");   String isbn = leerNoVacio(br);
-
-        // 🔒 Bloqueo global por ISBN: si ya existe en cualquier estante, NO se agrega.
-        if (catalogo.containsKey(isbn))
+            PersistenciaCSV.cargar(this);
+            System.out.println("[CSV] Carga completada.");
+        } catch (Exception e) 
         {
-            System.out.println("No se agregó: ya existe un libro con ISBN " + isbn + " en el sistema.");
-            return;
-        }
-
-        System.out.print("Título: "); String titulo = leerNoVacio(br);
-        System.out.print("Autor: ");  String autor = leerNoVacio(br);
-        System.out.print("Precio: "); double precio = parseDoubleSafe(br.readLine(), 0);
-        System.out.print("Stock: ");  int stock = parseIntSafe(br.readLine(), 0);
-
-        // Además, Estante.agregarLibro debería bloquear duplicado local si existiera.
-        boolean agregado = est.agregarLibro(titulo, autor, precio, stock, isbn);
-        if (!agregado)
-        {
-            System.out.println("No se agregó el libro (posible ISBN duplicado en el mismo estante).");
-            return;
-        }
-
-        // Synchronizar catálogo global
-        Libro recien = est.buscarPorIsbn(isbn);
-        if (recien != null) catalogo.put(isbn, recien);
-        System.out.println("Libro agregado al estante \"" + est.getNombre() + "\"");
-    }
-
-    private void opcionListarPorEstante() 
-    {
-        System.out.println("\n=== LISTADO POR ESTANTE ===");
-        for (Estante e : estantes) 
-        {
-            System.out.println("- " + e.getNombre());
-            e.listarLibros();
-        }
-        System.out.println("===========================");
-    }
-
-    private void opcionBuscarPorIsbn(BufferedReader br) throws IOException 
-    {
-        System.out.print("ISBN a buscar: ");
-        String isbn = leerNoVacio(br);
-        Libro l = catalogo.get(isbn);
-        if (l == null) System.out.println("No se encontró el libro.");
-        else System.out.println("Encontrado: " + l);
-    }
-
-    private void opcionRegistrarVenta(BufferedReader br) throws IOException 
-    {
-        System.out.print("RUT cliente: ");
-        String rut = leerNoVacio(br).toLowerCase();
-        Cliente cli = clientesPorRut.get(rut);
-        if (cli == null) 
-        {
-            System.out.println("Cliente no existe. Vamos a crearlo.");
-            System.out.print("Nombre: "); String nombre = leerNoVacio(br);
-            System.out.print("Correo: "); String correo = br.readLine().trim();
-            cli = new Cliente(nombre, rut, correo);
-            agregarClienteAlSistema(cli);
-        }
-
-        // Crear venta
-        String idVenta = nextVentaId();
-        Venta v = new Venta(idVenta, LocalDate.now(), cli);
-
-        // Loop de ítems
-        while (true)
-        {
-            System.out.print("ISBN del libro (o ENTER para terminar): ");
-            String isbn = br.readLine().trim();
-            if (isbn.isEmpty()) break;
-
-            Libro l = catalogo.get(isbn);
-            
-            if (l == null) 
-            {
-                System.out.println("No existe ese ISBN en el catálogo.");
-                continue;
-            }
-
-            System.out.print("Cantidad: ");
-            int cant = parseIntSafe(br.readLine(), 1);
-            if (cant <= 0) { System.out.println("Cantidad inválida."); continue; }
-
-            v.agregarItem(l, cant);
-        }
-
-        if (v.getItems().isEmpty()) 
-        {
-            System.out.println("No se agregaron ítems. Venta cancelada.");
-            return;
-        }
-
-        ventas.add(v);
-        System.out.println("Venta registrada:\n" + v);
-    }
-
-    private void opcionListarVentas()
-    {
-        if (ventas.isEmpty()) 
-        {
-            System.out.println("(no hay ventas)");
-            return;
-        }
-        for (Venta v : ventas) 
-        {
-            System.out.println(v);
+            System.err.println("[CSV] Error al cargar: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    private void opcionListarClientes() 
+    public void guardarDatosEnCSV() 
     {
-        if (clientes.isEmpty())
+        try 
         {
-            System.out.println("(no hay clientes)");
-            return;
-        }
-        for (Cliente c : clientes)
+            PersistenciaCSV.guardar(this);
+            System.out.println("[CSV] Guardado completado.");
+        } catch (Exception e) 
         {
-            System.out.println("• " + c);
+            System.err.println("[CSV] Error al guardar: " + e.getMessage());
+            e.printStackTrace();
         }
-    }
-
-    private void opcionAgregarCliente(BufferedReader br) throws IOException 
-    {
-        System.out.print("Nombre: "); String nombre = leerNoVacio(br);
-        System.out.print("RUT: ");    String rut = leerNoVacio(br);
-        System.out.print("Correo: "); String correo = br.readLine().trim();
-        
-        if (clientesPorRut.containsKey(rut.toLowerCase())) 
-        {
-            System.out.println("Ya existe un cliente con ese RUT.");
-            return;
-        }
-        agregarClienteAlSistema(new Cliente(nombre, rut, correo));
-        System.out.println("Cliente agregado.");
-    }
-
-    // HELPERS
-    private Estante buscarEstantePorNombre(String nombre) 
-    {
-        for (Estante e : estantes)
-        {
-            if (e.getNombre().equalsIgnoreCase(nombre)) return e;
-        }
-        return null;
-    }
-
-    private String leerNoVacio(BufferedReader br) throws IOException 
-    {
-        while (true) 
-        {
-            String s = br.readLine();
-            if (s != null) 
-            {
-                s = s.trim();
-                if (!s.isEmpty()) return s;
-            }
-            
-            System.out.print("Valor no puede estar vacío. Intenta de nuevo: ");
-        }
-    }
-
-    private int parseIntSafe(String s, int def) 
-    {
-        try { return Integer.parseInt(s.trim()); } catch (Exception e) { return def; }
-    }
-
-    private double parseDoubleSafe(String s, double def) 
-    {
-        try { return Double.parseDouble(s.trim()); } catch (Exception e) { return def; }
-    }
-
-    private String nextVentaId() 
-    {
-        return "V" + System.currentTimeMillis();
     }
 }
