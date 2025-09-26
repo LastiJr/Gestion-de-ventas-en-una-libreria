@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.mycompany.gestionlibreria.controlador.ControladorEstantes">
+    <top>
+        <HBox spacing="8">
+            <padding><Insets top="8" right="8" bottom="8" left="8"/></padding>
+            <Label text="Menú Estantes"/>
+            <Pane HBox.hgrow="ALWAYS"/>
+            <Button text="Volver" onAction="#volverAlMenu"/>
+        </HBox>
+    </top>
+
+    <center>
+        <SplitPane dividerPositions="0.4">
+            <VBox spacing="8" prefWidth="300">
+                <TableView fx:id="tablaEstantes">
+                    <columns><TableColumn text="Estantes" fx:id="colNombre" prefWidth="260"/></columns>
+                </TableView>
+                <HBox spacing="6">
+                    <TextField fx:id="txtNombre" promptText="Nombre estante"/>
+                    <Button text="Agregar" onAction="#agregarEstante"/>
+                </HBox>
+                <HBox spacing="6">
+                    <Button text="Renombrar" onAction="#renombrar"/>
+                    <Button text="Eliminar" onAction="#eliminar"/>
+                </HBox>
+            </VBox>
+
+            <VBox spacing="8">
+                <Label text="Libros del estante seleccionado"/>
+                <TableView fx:id="tablaLibros">
+                    <columns>
+                        <TableColumn text="ISBN" fx:id="cIsbn" prefWidth="110"/>
+                        <TableColumn text="Título" fx:id="cTitulo" prefWidth="220"/>
+                        <TableColumn text="Stock" fx:id="cStock" prefWidth="80"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </SplitPane>
+    </center>
+</BorderPane>
