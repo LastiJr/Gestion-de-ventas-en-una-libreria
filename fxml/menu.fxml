@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="373.0" prefWidth="588.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.gestionlibreria.controlador.ControladorMenu">
+
+    <children>
+
+        <Label layoutX="229.0" layoutY="21.0" prefHeight="50.0" prefWidth="130.0" style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Menú Principal">
+            <font><Font size="23.0" /></font>
+        </Label>
+
+        <ToggleButton fx:id="botonTema" layoutX="469.0" layoutY="29.0" onAction="#cambiarTema" style="-fx-background-radius: 50%; -fx-min-width: 34px; -fx-min-height: 34px;" text="Modo Oscuro" />
+
+        <Button layoutX="181.0" layoutY="291.0" onAction="#opcionVenta" prefHeight="60.0" prefWidth="226.0" text="Menú Ventas" />
+        <Button layoutX="359.0" layoutY="100.0" onAction="#opcionClientes" prefHeight="50.0" prefWidth="200.0" text="Menú Clientes" />
+        <Button layoutX="29.0" layoutY="184.0" onAction="#opcionEstantes" prefHeight="50.0" prefWidth="200.0" text="Menú Estantes" />
+        <Button layoutX="29.0" layoutY="100.0" onAction="#opcionLibros" prefHeight="50.0" prefWidth="200.0" text="Menú Libros" />
+        <Button layoutX="359.0" layoutY="184.0" onAction="#opcionVarios" prefHeight="50.0" prefWidth="200.0" text="Varios" />
+    </children>
+
+</AnchorPane>
