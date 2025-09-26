@@ -150,9 +150,9 @@ public class ControladorLibros
                 return; 
             }
 
-            Libro nuevo = new Libro(titulo, autor, precio, stock, isbn, editorial);
-            est.getLibros().add(nuevo);
-            sis.getCatalogo().put(isbn, nuevo);
+            sis.agregarLibroNuevo(
+                    titulo, autor, precio, stock, isbn, editorial, estanteNombre
+            );
 
             refrescarTablaDesdeSistema();
             info("Libro agregado.");
@@ -229,7 +229,8 @@ public class ControladorLibros
         try 
         {
             Estante est = buscarEstanteDe(sel);
-            if (est != null) est.getLibros().removeIf(l -> eq(l.getIsbn(), sel.getIsbn()));
+            if (est != null) 
+                est.getLibros().removeIf(l -> eq(l.getIsbn(), sel.getIsbn()));
             sis.getCatalogo().remove(sel.getIsbn());
 
             refrescarTablaDesdeSistema();
