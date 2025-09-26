@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mycompany.gestionlibreria.controlador.ControladorLibros"
+      spacing="8" prefWidth="800" prefHeight="600">
+
+    <HBox spacing="8">
+        <Label text="Menú Libros" style="-fx-font-size:16px; -fx-font-weight:bold;"/>
+        <Pane HBox.hgrow="ALWAYS"/>
+        <Button text="Volver" onAction="#volverAlMenu"/>
+    </HBox>
+
+    <HBox spacing="8">
+        <Label text="Buscar:"/>
+        <TextField fx:id="txtBuscarTitulo" promptText="Buscar el libro..." HBox.hgrow="ALWAYS"/>
+
+    </HBox>
+
+    <TableView fx:id="tablaLibros" prefHeight="300">
+        <columns>
+            <TableColumn fx:id="colIsbn" text="ISBN" prefWidth="120"/>
+            <TableColumn fx:id="colTitulo" text="Título" prefWidth="180"/>
+            <TableColumn fx:id="colAutor" text="Autor" prefWidth="140"/>
+            <TableColumn fx:id="colEditorial" text="Editorial" prefWidth="140"/>
+            <TableColumn fx:id="colPrecio" text="Precio" prefWidth="100"/>
+            <TableColumn fx:id="colStock" text="Stock" prefWidth="80"/>
+            <TableColumn fx:id="colEstante" text="Estante" prefWidth="120"/>
+        </columns>
+    </TableView>
+
+    <TitledPane text="Edición" expanded="true">
+        <content>
+            <GridPane hgap="8" vgap="8">
+                <Label text="ISBN:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtIsbn" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="Título:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtTitulo" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <Label text="Autor:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtAutor" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                <Label text="Editorial:" GridPane.rowIndex="3" GridPane.columnIndex="0"/> <!-- NUEVO -->
+                <TextField fx:id="txtEditorial" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                <Label text="Precio:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtPrecio" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                <Label text="Stock:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtStock" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+                <Label text="Estante:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                <ComboBox fx:id="comboEstante" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+                <HBox spacing="8" GridPane.rowIndex="7" GridPane.columnIndex="0" GridPane.columnSpan="2">
+                    <Button text="Agregar" onAction="#agregar"/>
+                    <Button text="Modificar" onAction="#modificar"/>
+                    <Button text="Eliminar" onAction="#eliminar"/>
+                    <Button text="Listar" onAction="#listar"/>
+                </HBox>
+            </GridPane>
+        </content>
+    </TitledPane>
+
+</VBox>
