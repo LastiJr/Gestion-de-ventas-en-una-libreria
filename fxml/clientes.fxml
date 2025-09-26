@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="8" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mycompany.gestionlibreria.controlador.ControladorClientes">
+    <HBox spacing="8">
+        <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+        <Label text="Menú Clientes"/>
+        <Pane HBox.hgrow="ALWAYS"/>
+        <Button text="Volver" onAction="#volverAlMenu"/>
+    </HBox>
+
+    <TableView fx:id="tabla" prefHeight="280">
+        <columns>
+            <TableColumn fx:id="cNombre" text="Nombre" prefWidth="160"/>
+            <TableColumn fx:id="cRut" text="RUT" prefWidth="140"/>
+            <TableColumn fx:id="cCorreo" text="Correo" prefWidth="200"/>
+            <TableColumn fx:id="cCompras" text="Compras" prefWidth="100"/>
+        </columns>
+    </TableView>
+
+    <TitledPane text="Edición" expanded="true">
+        <content>
+            <GridPane hgap="8" vgap="8">
+                <Label text="Nombre:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextField fx:id="tNombre" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                <Label text="RUT:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="tRut" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                <Label text="Correo:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <TextField fx:id="tCorreo" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                <HBox spacing="8" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2">
+                    <Button text="Listar" onAction="#listar"/>
+                    <Button text="Agregar" onAction="#agregar"/>
+                    <Button text="Modificar" onAction="#modificar"/>
+                    <Button text="Eliminar" onAction="#eliminar"/>
+                </HBox>
+            </GridPane>
+        </content>
+    </TitledPane>
+</VBox>
