@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mycompany.gestionlibreria.controlador.ControladorVarios"
+      spacing="10" prefWidth="1000" prefHeight="700">
+
+    <HBox spacing="8">
+        <Label text="Varios / Reportes" style="-fx-font-size:16px; -fx-font-weight:bold;"/>
+        <Pane HBox.hgrow="ALWAYS"/>
+        <Button text="Volver" onAction="#volverAlMenu"/>
+    </HBox>
+
+    <HBox spacing="10">
+        <Label text="Rango:"/>
+        <ComboBox fx:id="comboRango" prefWidth="180"/>
+        <Label text="Categoría:"/>
+        <ComboBox fx:id="comboCategoria" prefWidth="200"/>
+        <Pane HBox.hgrow="ALWAYS"/>
+        <Button text="Exportar a Excel" onAction="#exportar"/>
+    </HBox>
+
+    <BorderPane VBox.vgrow="ALWAYS">
+        <center>
+            <BarChart fx:id="barChart" prefHeight="600" prefWidth="980">
+                <xAxis>
+                    <CategoryAxis fx:id="xAxis"/>
+                </xAxis>
+                <yAxis>
+                    <NumberAxis fx:id="yAxis"/>
+                </yAxis>
+            </BarChart>
+        </center>
+    </BorderPane>
+
+    <Label fx:id="lblResumen" text="" style="-fx-text-fill:#555;"/>
+
+</VBox>
