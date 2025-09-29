@@ -11,10 +11,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
-
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.regex.Pattern;
+import com.mycompany.gestionlibreria.RutInvalido;
+import com.mycompany.gestionlibreria.CorreoInvalido;
 
 public class ControladorClientes implements Initializable 
 {
@@ -104,10 +105,15 @@ public class ControladorClientes implements Initializable
                 return; 
             }
 
-            Cliente c = new Cliente(nombre, rutFmt, correo);
-            sis.agregarClienteAlSistema(c);
 
-            
+            try {
+                Cliente c = new Cliente(nombre, rutFmt, correo); 
+                sis.agregarClienteAlSistema(c);
+            } catch (RutInvalido | CorreoInvalido ex) {
+                warn("Error: " + ex.getMessage());
+                return;
+            }
+
             tRut.setText(rutFmt);
 
             listar();
@@ -159,9 +165,15 @@ public class ControladorClientes implements Initializable
             return; 
         }
 
-        sel.setNombre(nombre);
-        sel.setRut(rutFmt);
-        sel.setCorreo(correo);
+        try {
+            sel.setNombre(nombre);
+            sel.setRut(rutFmt);      
+            sel.setCorreo(correo);   
+        } catch (RutInvalido | CorreoInvalido ex) {
+            warn("Error: " + ex.getMessage());
+            return;
+        }
+
         tRut.setText(rutFmt);
         tabla.refresh();
         info("Cliente modificado.");
