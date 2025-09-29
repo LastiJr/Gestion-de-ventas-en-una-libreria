@@ -5,7 +5,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.time.LocalDate;
 import java.util.*;
-
+import com.mycompany.gestionlibreria.RutInvalido;
+import com.mycompany.gestionlibreria.CorreoInvalido;
 
 public final class PersistenciaCSV 
 {
@@ -156,10 +157,17 @@ public final class PersistenciaCSV
                     String nombre = unesc(get(a,0));
                     String rut    = unesc(get(a,1));
                     String correo = unesc(get(a,2));
-                    Cliente c = new Cliente(nombre, rut, correo);
-                    sis.getClientes().add(c);
-                    if (c.getRut()!=null) 
-                        sis.getClientesPorRut().put(c.getRut().toLowerCase(), c);
+
+
+                    try {
+                        Cliente c = new Cliente(nombre, rut, correo);
+                        sis.getClientes().add(c);
+                        if (c.getRut()!=null) 
+                            sis.getClientesPorRut().put(c.getRut().toLowerCase(), c);
+                    } catch (RutInvalido | CorreoInvalido ex) {
+                        System.err.println("[CSV] Cliente descartado por datos inválidos: " + ex.getMessage());
+
+                    }
                 }
             }
         }
